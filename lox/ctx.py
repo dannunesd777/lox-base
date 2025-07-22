@@ -80,6 +80,7 @@ class Ctx:
         """
         Define uma variável no contexto atual.
         """
+        # Permite redeclaração no escopo global
         if name in self.scope and not self.is_global():
             raise KeyError(f"Variable '{name}' already defined in the current scope.")
         self.scope[name] = value
@@ -136,6 +137,22 @@ class Ctx:
         if self.parent is None:
             return False
         return self.parent.parent is None
+    
+    def child(self):
+        """Cria um novo contexto-filho com este contexto como pai."""
+        return Ctx(scope={}, parent=self)
+    
+    def define(self, name, value):
+        """Define uma variável no escopo atual, sem procurar nos pais."""
+        self.scope[name] = value
+
+    def assign(self, key: str, value: "Value"):
+        if key in self.scope:
+            self.scope[key] = value
+        elif self.parent is not None:
+            self.parent.assign(key, value)
+        else:
+            raise KeyError(f"Variable '{key}' not found for assignment.")
 
 
 def pretty_scope(env: ScopeDict, index: int) -> str:

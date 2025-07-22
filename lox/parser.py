@@ -100,3 +100,4 @@ def lex(src: str) -> Iterator[Token]:
     Retorna um iterador sobre os tokens do código fonte.
     """
     return ast_parser.lex(src)
+

@@ -1,17 +1,58 @@
 ?start     : program
 
-program    : stmt*
+program    : declaration*
+
+?declaration : var_def
+             | fun_def
+             | class_def
+             | stmt
 
 ?stmt      : expr ";"
            | print_cmd
-           // | if_cmd
-           // | for_cmd
-           // | ...
+           | if_cmd
+           | while_cmd
+           | for_cmd
+           | block
+           | return_cmd
+
+
+block      : "{" declaration* "}"
+
 
 print_cmd  : "print" expr ";"
+var_def    : "var" VAR ("=" expr)? ";"
+fun_def    : "fun" VAR "(" fun_args ")" block
+fun_args   : [ VAR ("," VAR)* ]
+return_cmd : "return" expr? ";"
+if_cmd     : "if" "(" expr ")" stmt [ "else" stmt ]
+while_cmd  : "while" "(" expr ")" stmt
+for_cmd    : "for" "(" for_args ")" stmt
+for_args   : (var_def | opt_expr ";") opt_expr ";" opt_expr
+opt_expr   : expr?
+
+class_def   : "class" VAR class_super? "{" class_methods "}"
+
+class_super : "<" VAR
+
+class_methods : (method_def)*
+method_def   : VAR "(" fun_args ")" block
 
 // EXPRESSÕES
-?expr      : test
+
+
+?expr      : assignment
+
+
+assignment  : atom "." VAR "=" assignment   -> setattr
+            | VAR "=" assignment         -> assign
+            | logic_or 
+            
+
+
+
+?logic_or  : logic_and ( "or" logic_and)*  -> logic_or
+
+?logic_and : test ( "and" test )*          -> logic_and
 
 ?test      : test "==" cmp  -> eq
            | test "!=" cmp  -> ne
@@ -29,24 +70,34 @@ print_cmd  : "print" expr ";"
 
 ?term      : term "*" atom   -> mul
            | term "/" atom   -> div 
-           | atom
+           | unary
 
-?atom      : NUMBER 
+unary      : "!" unary         -> not_
+           | "-" unary         -> neg
+           | atom 
+
+?atom      : atom "." VAR    -> atr
+           | NUMBER 
            | BOOL
-           | VAR
            | STRING
            | NIL
-           | "(" cmp ")"
+           | THIS
+           | SUPER "." VAR -> super_expr
+           | VAR
+           | "(" expr ")"
            | call
 
-call       : VAR "(" params ")"
+call       : atom "(" params ")"
 params     : [ expr ("," expr )* ]
 
 BOOL.2     : "true" | "false"
-VAR.1      : /[a-z_]\w*/
 NUMBER     : /([1-9][0-9]*|0)(\.[0-9]+)?/ 
 STRING     : /"[^"]*"/
+VAR.1      : /[a-zA-Z_]\w*/
 NIL.2      : "nil"
+THIS.2     : "this"
+SUPER.2    : "super"
 COMMENT    : "//" /[^\n]*/
+
 
 %ignore /\s/ | COMMENT

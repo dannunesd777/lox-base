@@ -15,11 +15,11 @@ Se você não conseguir pensar em exemplos para uma categoria, escreva "nenhum" 
 """
 
 VALIDOS_EM_AMBAS_ESPECIFICACOES: list[str] = [
+    "0",
     "1",
-    "2.72",
-    "3",
-    "42",
-    "5",
+    "123",
+    "3.14",
+    "42.0",
 ]
 
 VALIDOS_EM_LOX_E_INVALIDOS_NA_NOSSA_VERSAO: list[str] = [
